@@ -12,7 +12,8 @@ class LibraryController extends Controller
      */
     public function index()
     {
-        //
+        $libraries = Library::all();
+        return response()->json($libraries);
     }
 
     /**
@@ -20,7 +21,22 @@ class LibraryController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+                'name' => ['required' , 'string' , 'max:255'],
+                'number' => ['required' , 'string' , 'max:10'],
+                'track_type' => ['required', 'string', 'max:50'],
+                'street' => ['required', 'string', 'max:255' ],
+                'city' => ['required', 'string', 'max:255']
+                ]);
+
+        $libraries = new Library();
+        $libraries->name = $validated['name'];
+        $libraries->number = $validated['number'];
+        $libraries->track_type = $validated['track_type'];
+        $libraries->street = $validated['street'];
+        $libraries->city = $validated['city'];
+        $libraries->save();
+        return $libraries;
     }
 
     /**
@@ -28,7 +44,7 @@ class LibraryController extends Controller
      */
     public function show(Library $library)
     {
-        //
+        return $library;
     }
 
     /**

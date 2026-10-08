@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class UserController extends Controller
@@ -11,7 +12,8 @@ class UserController extends Controller
      */
     public function index()
     {
-        //
+        $users = User::all();
+        return response()->json($users);
     }
 
     /**
@@ -19,15 +21,23 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'email' => ['required', 'email:rfc,dns', 'unique:users,email'],
+            'name' => ['required' , 'string' , 'max:100'],
+            'firstname' => ['required', 'string', 'max:100'],
+            'password' => ['required', 'string', 'min:8' ,'max:255'],
+            'library_id' => ['required', 'integer','max:255'],
+            ]);
+
+        return User::create($request->all());
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(User $user)
     {
-        //
+        return $user;
     }
 
     /**
@@ -35,7 +45,7 @@ class UserController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        return User::update($request->all());
     }
 
     /**
@@ -45,4 +55,6 @@ class UserController extends Controller
     {
         //
     }
+
+
 }
