@@ -26,7 +26,7 @@ class LibraryController extends Controller
                 'number' => ['required' , 'string' , 'max:10'],
                 'track_type' => ['required', 'string', 'max:50'],
                 'street' => ['required', 'string', 'max:255' ],
-                'city' => ['required', 'string', 'max:255']
+                'city' => ['required', 'string', 'max:255'],
                 ]);
 
         $libraries = new Library();
@@ -62,4 +62,15 @@ class LibraryController extends Controller
     {
         //
     }
+
+    public function copies(Library $library)
+    {
+        return $library->copies;
+    }
+
+    public function users(Library $library)
+    {
+        return $library->users;
+    }
+
 }

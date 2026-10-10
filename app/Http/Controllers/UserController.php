@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -13,7 +15,7 @@ class UserController extends Controller
     public function index()
     {
         $users = User::all();
-        return response()->json($users);
+        return $users;
     }
 
     /**
@@ -23,13 +25,21 @@ class UserController extends Controller
     {
         $request->validate([
             'email' => ['required', 'email:rfc,dns', 'unique:users,email'],
-            'name' => ['required' , 'string' , 'max:100'],
+            'name' => ['required', 'string', 'max:100'],
             'firstname' => ['required', 'string', 'max:100'],
-            'password' => ['required', 'string', 'min:8' ,'max:255'],
-            'library_id' => ['required', 'integer','max:255'],
-            ]);
+            'password' => ['required', 'string', 'min:8', 'max:255'],
+            'library_id' => ['required', 'integer', 'max:255'],
+        ]);
 
-        return User::create($request->all());
+        $user = User::create($request->all());
+        $validate_token = $user->createToken('validate_token');
+
+        return [
+            "data" => $user,
+            "meta" => [
+                "token" => $validate_token->plainTextToken
+            ],
+        ];
     }
 
     /**
@@ -53,8 +63,35 @@ class UserController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $result = User::findOrFail($id)->delete();
+        return response()->json($result);
     }
 
+    public function login(Request $request)
+    {
+
+        $user = User::where("email", $request->email)->first();
+
+        if (!$user || !Hash::check($request->password, $user->password) /* || !$user->email_verified_at*/) {
+            throw new AuthorizationException();
+        }
+
+        $token = $user->createToken("validation_token");
+
+        return [
+            "data" => $token->plainTextToken
+        ];
+    }
+
+    public function logout(Request $request){
+        $request->user()->currentAccessToken()->delete();
+    }
+
+    public function me(Request $request)
+    {
+        return [
+            "data" => $request->user()
+        ];
+    }
 
 }
